@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Noto+Serif+TC:wght@300;400;500;700&family=Inter:wght@300;400;500&display=swap');
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-hand: "Caveat", cursive;
+  --font-serif: "Noto Serif TC", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --color-brand-pink: #FFD1DC;
+  --color-brand-blue: #A1C4FD;
+  --color-brand-cream: #FFF9F5;
+  --color-brand-sage: #E2F0CB;
+  
+  --shadow-soft: 0 10px 30px -5px rgba(255, 209, 220, 0.3);
+  --shadow-float: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  body {
+    @apply bg-brand-cream text-slate-700 font-sans antialiased selection:bg-brand-pink/30;
+  }
+}
+
+.handwritten {
+  font-family: var(--font-hand);
+  @apply tracking-wide leading-relaxed;
+}
+
+.serif-text {
+  font-family: var(--font-serif);
+  @apply tracking-wider leading-relaxed;
+}
+
+.glass-card {
+  @apply bg-white/60 backdrop-blur-2xl border border-white/60 rounded-[2.5rem] shadow-float transition-all duration-700;
+}
+
+.markdown-body h2 {
+  @apply text-lg font-serif font-medium text-slate-800 mt-12 mb-6 tracking-[0.2em] text-center border-b border-slate-100 pb-2 flex items-center justify-center gap-4;
+}
+
+.markdown-body h2::before, .markdown-body h2::after {
+  content: '';
+  @apply h-[0.5px] w-8 bg-brand-pink/30;
+}
+
+.markdown-body h3 {
+  @apply text-sm font-serif font-medium text-slate-400 mt-8 mb-4 tracking-widest uppercase text-center;
+}
+
+.markdown-body strong, .markdown-body b {
+  @apply text-brand-pink font-medium;
+}
+
+.markdown-body p {
+  @apply mb-4 leading-relaxed text-slate-600 font-light text-[15px] tracking-wide text-justify;
+}
+
+.markdown-body blockquote {
+  @apply italic border-l-2 border-brand-pink/30 pl-8 my-12 text-slate-500 font-serif text-xl leading-relaxed bg-brand-pink/5 py-8 pr-6 rounded-r-3xl relative overflow-hidden;
+}
+
+.markdown-body blockquote::before {
+  content: '“';
+  @apply absolute top-2 left-2 text-4xl text-brand-pink/10 font-serif;
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-slate-700 via-brand-pink to-slate-700;
+}

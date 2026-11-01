@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User Profile
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['displayName', 'email', 'createdAt']) &&
+               data.keys().size() == 3 &&
+               data.displayName is string && data.displayName.size() <= 100 &&
+               data.email is string && data.email.size() <= 100 &&
+               data.createdAt is string;
+      }
+
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && request.auth.token.email_verified == true && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && request.auth.token.email_verified == true && isValidUser(request.resource.data) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName']);
+    }
+
+    // Entries
+    match /users/{userId}/entries/{entryId} {
+      function isValidEntry(data) {
+        return data.keys().hasAll(['content', 'type', 'createdAt', 'authorId']) &&
+               data.content is string && data.content.size() <= 10000 &&
+               data.type in ['material', 'reflection', 'note'] &&
+               data.createdAt is timestamp &&
+               data.authorId == userId;
+      }
+
+      allow list, get: if isOwner(userId);
+      allow create: if isOwner(userId) && request.auth.token.email_verified == true && isValidEntry(request.resource.data);
+      allow update: if isOwner(userId) && request.auth.token.email_verified == true && isValidEntry(request.resource.data) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback', 'content', 'mood', 'userMood', 'interpretation', 'annotations']);
+      allow delete: if isOwner(userId);
+    }
+
+    // Laozi Draws
+    match /users/{userId}/laozi_draws/{drawId} {
+      function isValidDraw(data) {
+        return data.keys().hasAll(['chapterNumber', 'drawnAt', 'userId']) &&
+               data.chapterNumber is int && data.chapterNumber >= 1 && data.chapterNumber <= 81 &&
+               data.drawnAt is timestamp &&
+               data.userId == request.auth.uid;
+      }
+
+      allow list, get: if isOwner(userId);
+      allow create: if isOwner(userId) && request.auth.token.email_verified == true && isValidDraw(request.resource.data);
+      allow update: if isOwner(userId) && request.auth.token.email_verified == true && isValidDraw(request.resource.data) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reflection', 'detail', 'wordAnalysis']);
+    }
+
+    // Favorites
+    match /users/{userId}/favorites/{favoriteId} {
+      function isValidFavorite(data) {
+        return data.keys().hasAll(['type', 'savedAt', 'title', 'userId']) &&
+               (data.type == 'fortune' ? data.keys().hasAll(['chapterNumber']) : data.keys().hasAll(['entryId'])) &&
+               data.savedAt is timestamp &&
+               data.title is string && data.title.size() <= 100 &&
+               data.userId == request.auth.uid;
+      }
+
+      allow list, get: if isOwner(userId);
+      allow create: if isOwner(userId) && request.auth.token.email_verified == true && isValidFavorite(request.resource.data);
+      allow update: if isOwner(userId) && request.auth.token.email_verified == true && isValidFavorite(request.resource.data) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['savedAt', 'title']);
+      allow delete: if isOwner(userId);
+    }
+  }
+}

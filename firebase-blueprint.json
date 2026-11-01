@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Store user's basic profile and preferences.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["displayName", "email", "createdAt"]
+    },
+    "Entry": {
+      "title": "Journal Entry",
+      "description": "A material clipping or a personal reflection.",
+      "type": "object",
+      "properties": {
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["material", "reflection"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "authorId": { "type": "string" },
+        "feedback": { "type": "string" },
+        "mood": { "type": "string", "description": "AI detected emotion score 1-10 or label" }
+      },
+      "required": ["content", "type", "createdAt", "authorId"]
+    },
+    "LaoziDraw": {
+      "title": "Laozi Fortune Draw",
+      "description": "Record of a drawn chapter from Tao Te Ching.",
+      "type": "object",
+      "properties": {
+        "chapterNumber": { "type": "integer" },
+        "drawnAt": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" },
+        "reflection": { "type": "string" }
+      },
+      "required": ["chapterNumber", "drawnAt", "userId"]
+    },
+    "Favorite": {
+      "title": "Favorite Content",
+      "description": "User favorited content (Fortune chapter or Journal entry).",
+      "type": "object",
+      "properties": {
+        "chapterNumber": { "type": "integer" },
+        "entryId": { "type": "string" },
+        "type": { "type": "string", "enum": ["fortune", "journal"] },
+        "savedAt": { "type": "string", "format": "date-time" },
+        "title": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["type", "savedAt", "userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data"
+    },
+    "/users/{userId}/entries/{entryId}": {
+      "schema": "Entry",
+      "description": "User's journal entries and material clippings"
+    },
+    "/users/{userId}/laozi_draws/{drawId}": {
+      "schema": "LaoziDraw",
+      "description": "History of Laozi chapters drawn by the user"
+    },
+    "/users/{userId}/favorites/{favoriteId}": {
+      "schema": "Favorite",
+      "description": "User's favorite Laozi chapters"
+    }
+  }
+}
